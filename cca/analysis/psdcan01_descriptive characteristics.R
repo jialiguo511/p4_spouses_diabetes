@@ -1,28 +1,19 @@
 rm(list=ls());gc();source(".Rprofile")
 
-analytic_df_wide <- readRDS(paste0(path_spouses_diabetes_folder,"/working/cca/preprocessing/archive/psdcpre04_analytic dataset wide.RDS"))
+dyads <- readRDS(paste0(path_spouses_diabetes_folder,"/working/cca/preprocessing/psdcpre03_spouse dyad dataset.RDS"))
 
-# Load wide-format baseline data (one row per couple)
-baseline_wide <- analytic_df_wide %>% 
-  dplyr::filter(fup == 0)
-
-# ============================================================================
-# Define variables for Table 1
-# ============================================================================
-
-continuous_vars <- c("age", "bmi", "sbp", "dbp", "waist_cm", "fpg")  
+continuous_vars <- c("age", "bmi", "waist_cm")  
 proportion_vars <- c("smk_overall", "alc_overall", "famhx_htn", "famhx_dm", "famhx_cvd",
-                     "chd", "cva", "ckd",
-                     "dm_biomarker", "overweight", "hypertension", "high_tg")
-grouped_vars <- c("edu_category", "employ_category", "bmibs_category", "morbidity_category")     
+                     "chd", "cva", "ckd", "dm_biomarker0", "htn")
+grouped_vars <- c("educcat", "employocccat",  "multimorbiditycat", "bmicat")     
 
 # 1. Continuous variables: Mean (SD) and Pearson correlation
 continuous_tbl <- map_dfr(continuous_vars, function(var) {
-  female_col <- paste0("female_", var)
-  male_col <- paste0("male_", var)
+  female_col <- paste0(var, "_wife")
+  male_col <- paste0(var, "_husb")
   
-  f_vals <- baseline_wide[[female_col]]
-  m_vals <- baseline_wide[[male_col]]
+  f_vals <- dyads[[female_col]]
+  m_vals <- dyads[[male_col]]
   
   # Calculate correlation for paired data
   r <- cor(f_vals, m_vals, use = "pairwise.complete.obs")
@@ -39,11 +30,11 @@ continuous_tbl <- map_dfr(continuous_vars, function(var) {
 
 # 2. Binary proportion variables
 binary_tbl <- map_dfr(proportion_vars, function(var) {
-  female_col <- paste0("female_", var)
-  male_col <- paste0("male_", var)
+  female_col <- paste0(var, "_wife")
+  male_col <- paste0(var, "_husb")
   
-  f_vals <- baseline_wide[[female_col]]
-  m_vals <- baseline_wide[[male_col]]
+  f_vals <- dyads[[female_col]]
+  m_vals <- dyads[[male_col]]
   
   # Counts and percentages
   f_n <- sum(f_vals == 1, na.rm = TRUE)
@@ -88,11 +79,11 @@ binary_tbl <- map_dfr(proportion_vars, function(var) {
 
 # 3. Grouped variables
 categorical_tbl <- map_dfr(grouped_vars, function(var) {
-  female_col <- paste0("female_", var)
-  male_col <- paste0("male_", var)
+  female_col <- paste0(var, "_wife")
+  male_col <- paste0(var, "_husb")
   
-  f_vals <- baseline_wide[[female_col]]
-  m_vals <- baseline_wide[[male_col]]
+  f_vals <- dyads[[female_col]]
+  m_vals <- dyads[[male_col]]
   
   # Get all levels
   all_levels <- unique(c(f_vals, m_vals))

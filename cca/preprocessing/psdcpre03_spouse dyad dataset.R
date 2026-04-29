@@ -52,6 +52,8 @@ dyads <- dyads0 %>%
     )
   )
 
+saveRDS(dyads, paste0(path_spouses_diabetes_folder,"/working/cca/preprocessing/psdcpre03_spouse dyad dataset.RDS"))
+
 
 # SAS-like mean and ratio outputs (SRS assumptions for SE/CI)
 mean_table <- function(df, var_name, group_var) {

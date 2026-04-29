@@ -1,0 +1,5 @@
+"Individual's status at baseline","Individuals with following partner's status at baseline","Age adjusted OR (95% CI)","Model 1 adjusted OR (95% CI)","Model 2 adjusted OR (95% CI)"
+"Women without diabetes at baseline (n=1015)","No diabetes (n=995)","1.00","1.00","1.00"
+"Women without diabetes at baseline (n=1015)","Diabetes (n=20)","1.06 (0.40 - 2.80)","0.92 (0.34 - 2.47)","1.02 (0.37 - 2.83)"
+"Men without diabetes at baseline (n=1014)","No diabetes (n=995)","1.00","1.00","1.00"
+"Men without diabetes at baseline (n=1014)","Diabetes (n=19)","1.36 (0.48 - 3.87)","1.32 (0.46 - 3.80)","1.41 (0.48 - 4.14)"

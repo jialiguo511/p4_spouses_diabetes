@@ -1,31 +1,14 @@
 rm(list=ls());gc();source(".Rprofile")
 
-source("cca/preprocessing/archive/psdcpre03_dm incidence df.R")
+library(dplyr)
+library(tidyr)
 
-analytic_df_wide <- readRDS(paste0(path_spouses_diabetes_folder,"/working/cca/preprocessing/archive/psdcpre04_analytic dataset wide.RDS"))
+dyads <- readRDS(paste0(path_spouses_diabetes_folder,"/working/cca/preprocessing/psdcpre03_spouse dyad dataset.RDS"))
 
 # ============================================================================
-# Table 3: Risk of diabetes over follow-up by partner baseline diabetes status
+# Table 3: Risk of incident diabetes over follow-up by partner baseline status
 # among individuals without diabetes at baseline.
 # ============================================================================
-
-# One row per couple at baseline for partner baseline status.
-baseline_dyads <- analytic_df_wide %>%
-  dplyr::filter(fup == 0) %>%
-  dplyr::select(
-    hhid,
-    carrs,
-    female_pid,
-    male_pid,
-    female_baseline_dm,
-    male_baseline_dm
-  ) %>%
-  dplyr::distinct()
-
-# Person-level follow-up diabetes outcome among baseline diabetes-free participants.
-followup_outcome <- dm_event_or_censor_df %>%
-  dplyr::select(carrs, pid, dm_incident) %>%
-  dplyr::distinct(carrs, pid, .keep_all = TRUE)
 
 build_table_section <- function(data, baseline_label) {
   data %>%
@@ -66,22 +49,17 @@ build_table_section <- function(data, baseline_label) {
 }
 
 # Women without diabetes at baseline: follow-up diabetes by husband's baseline status.
-women_df <- baseline_dyads %>%
-  dplyr::filter(female_baseline_dm == 0) %>%
-  dplyr::left_join(
-    followup_outcome %>%
-      dplyr::rename(female_pid = pid, female_followup_dm = dm_incident),
-    by = c("carrs", "female_pid")
-  ) %>%
+women_df <- dyads %>%
+  dplyr::filter(dm_biomarker0_wife == 0) %>%
   dplyr::mutate(
     partner_status = dplyr::case_when(
-      male_baseline_dm == 0 ~ "No diabetes",
-      male_baseline_dm == 1 ~ "Diabetes",
+      dm_biomarker0_husb == 0 ~ "No diabetes",
+      dm_biomarker0_husb == 1 ~ "Diabetes",
       TRUE ~ NA_character_
     ),
     outcome_status = dplyr::case_when(
-      female_followup_dm == 0 ~ "No diabetes",
-      female_followup_dm == 1 ~ "Diabetes",
+      event_DMbiomarker_wife == 0 ~ "No diabetes",
+      event_DMbiomarker_wife == 1 ~ "Diabetes",
       TRUE ~ NA_character_
     )
   ) %>%
@@ -96,22 +74,17 @@ women_label <- paste0(
 women_section <- build_table_section(women_df, women_label)
 
 # Men without diabetes at baseline: follow-up diabetes by wife's baseline status.
-men_df <- baseline_dyads %>%
-  dplyr::filter(male_baseline_dm == 0) %>%
-  dplyr::left_join(
-    followup_outcome %>%
-      dplyr::rename(male_pid = pid, male_followup_dm = dm_incident),
-    by = c("carrs", "male_pid")
-  ) %>%
+men_df <- dyads %>%
+  dplyr::filter(dm_biomarker0_husb == 0) %>%
   dplyr::mutate(
     partner_status = dplyr::case_when(
-      female_baseline_dm == 0 ~ "No diabetes",
-      female_baseline_dm == 1 ~ "Diabetes",
+      dm_biomarker0_wife == 0 ~ "No diabetes",
+      dm_biomarker0_wife == 1 ~ "Diabetes",
       TRUE ~ NA_character_
     ),
     outcome_status = dplyr::case_when(
-      male_followup_dm == 0 ~ "No diabetes",
-      male_followup_dm == 1 ~ "Diabetes",
+      event_DMbiomarker_husb == 0 ~ "No diabetes",
+      event_DMbiomarker_husb == 1 ~ "Diabetes",
       TRUE ~ NA_character_
     )
   ) %>%
